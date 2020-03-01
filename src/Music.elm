@@ -1,6 +1,7 @@
-module Music exposing (AbsPitch, Interval(..), Octave, Pitch, PitchClass(..), absPitch, defaultPCs, pcToInt, pitch)
+module Music exposing (AbsPitch, Chord, ChordDefinition, Interval(..), IntervalLength, Octave, Pitch, PitchClass(..), absPitch, augmentedSeventhChord, augmentedTriad, chord, defaultPCs, diminishedSeventhChord, diminishedTriad, dominantSeventhChord, dominantSeventhFlat5Chord, dominantSeventhSus4Chord, intervalLength, majorSeventhChord, majorSixthChord, majorSus2, majorSus4, majorTriad, minorMajorChord, minorSeventhChord, minorSeventhFlat5Chord, minorSixthChord, minorTriad, pcToInt, pitch)
 
 import Array
+import List.Extra exposing (scanl)
 
 
 
@@ -22,8 +23,23 @@ type alias Pitch =
     }
 
 
+
+-- from my other project:
+-- https://github.com/lfborjas/piano-pal/blob/6d8d0067d9a14c6a7339a2517d73dd3bac15373e/src/Scales.hs
+
+
 type alias IntervalLength =
     Int
+
+
+type alias ChordDefinition =
+    List Interval
+
+
+type alias Chord =
+    { root : PitchClass
+    , intervals : ChordDefinition
+    }
 
 
 type PitchClass
@@ -78,8 +94,9 @@ type Interval
     | PerfectFourth -- AugmentedThird
     | DiminishedFifth -- AugmentedFourth
     | PerfectFifth -- DiminishedSixth
-    | MinorSixth -- AugmentedFifth
-    | MajorSixth -- DiminishedSeventh
+    | AugmentedFifth -- MinorSixth
+    | MajorSixth -- Same as DiminishedSeventh, but both used in Jazz on their own.
+    | DiminishedSeventh -- Same as MajorSixth
     | MinorSeventh -- AugmentedSixth
     | MajorSeventh -- DiminishedOctave
     | PerfectOctave -- AugmentedSeventh | DiminishedNinth
@@ -132,6 +149,47 @@ pitch ap =
 
         Just v ->
             Just { pitchClass = v, octave = oct - 1 }
+
+
+
+{- Get the pitches in a chord:
+
+   > chord (Chord C majorTriad) 4
+   Just [{ octave = 4, pitchClass = C }
+        ,{ octave = 4, pitchClass = E }
+        ,{ octave = 4, pitchClass = G }
+        ] : Maybe (List Pitch)
+
+-}
+
+
+chord : Chord -> Octave -> Maybe (List Pitch)
+chord { root, intervals } octave =
+    let
+        startingAbsPitch =
+            absPitch <| Pitch root octave
+
+        resultingAbsPitches =
+            List.map (addInterval startingAbsPitch) intervals
+
+        resultingPitches =
+            List.filterMap pitch resultingAbsPitches
+    in
+    case resultingPitches of
+        [] ->
+            Nothing
+
+        l ->
+            Just l
+
+
+addInterval : AbsPitch -> Interval -> AbsPitch
+addInterval ap interval =
+    let
+        len =
+            intervalLength interval
+    in
+    ap + len
 
 
 pcToInt : PitchClass -> Int
@@ -241,3 +299,162 @@ pcToInt pc =
 
         Bss ->
             13
+
+
+intervalLength : Interval -> IntervalLength
+intervalLength interval =
+    case interval of
+        PerfectUnison ->
+            0
+
+        MinorSecond ->
+            1
+
+        MajorSecond ->
+            2
+
+        MinorThird ->
+            3
+
+        MajorThird ->
+            4
+
+        PerfectFourth ->
+            5
+
+        DiminishedFifth ->
+            6
+
+        PerfectFifth ->
+            7
+
+        AugmentedFifth ->
+            8
+
+        MajorSixth ->
+            9
+
+        DiminishedSeventh ->
+            9
+
+        MinorSeventh ->
+            10
+
+        MajorSeventh ->
+            11
+
+        PerfectOctave ->
+            12
+
+        MinorNinth ->
+            13
+
+        MajorNinth ->
+            14
+
+        MinorTenth ->
+            15
+
+        MajorTenth ->
+            16
+
+        PerfectEleventh ->
+            17
+
+        DiminishedTwelfth ->
+            18
+
+        PerfectTwelfth ->
+            19
+
+        MinorThirteenth ->
+            20
+
+        MajorThirteenth ->
+            21
+
+        MinorFourteenth ->
+            22
+
+        MajorFourteenth ->
+            23
+
+        DoubleOctave ->
+            24
+
+
+
+-- CHORD DEFINITIONS
+-- TRIADS
+
+
+majorTriad =
+    [ PerfectUnison, MajorThird, PerfectFifth ]
+
+
+majorSus2 =
+    [ PerfectUnison, MajorSecond, PerfectFifth ]
+
+
+majorSus4 =
+    [ PerfectUnison, PerfectFourth, PerfectFifth ]
+
+
+minorTriad =
+    [ PerfectUnison, MinorThird, PerfectFifth ]
+
+
+diminishedTriad =
+    [ PerfectUnison, MinorThird, DiminishedFifth ]
+
+
+augmentedTriad =
+    [ PerfectUnison, MajorThird, AugmentedFifth ]
+
+
+
+-- SEVENTH AND SIXTH CHORDS
+
+
+majorSeventhChord =
+    majorTriad ++ [ MajorSeventh ]
+
+
+majorSixthChord =
+    majorTriad ++ [ MajorSixth ]
+
+
+dominantSeventhChord =
+    majorTriad ++ [ MinorSeventh ]
+
+
+dominantSeventhSus4Chord =
+    majorSus4 ++ [ MinorSeventh ]
+
+
+minorSeventhChord =
+    minorTriad ++ [ MinorSeventh ]
+
+
+minorSeventhFlat5Chord =
+    diminishedTriad ++ [ MinorSeventh ]
+
+
+augmentedSeventhChord =
+    augmentedTriad ++ [ MinorSeventh ]
+
+
+dominantSeventhFlat5Chord =
+    [ PerfectUnison, MajorThird, DiminishedFifth, MinorSeventh ]
+
+
+minorMajorChord =
+    minorTriad ++ [ MajorSeventh ]
+
+
+diminishedSeventhChord =
+    diminishedTriad ++ [ DiminishedSeventh ]
+
+
+minorSixthChord =
+    minorTriad ++ [ MajorSixth ]
