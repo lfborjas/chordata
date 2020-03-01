@@ -64,14 +64,29 @@ view : Model -> Document Msg
 view model =
     { title = "Chordata"
     , body =
-        [ input
-            [ type_ "text"
-            , placeholder "Type a chord"
-            , value (Maybe.withDefault "" model.chordString)
-            , onInput Typed
+        -- https://tachyons.io/components/layout/centered-container/index.html
+        [ section [ class "mw5 mw7-ns center pa3 ph5-ns sans-serif" ]
+            -- https://tachyons.io/components/forms/newsletter-subscription/index.html
+            [ fieldset [ class "ba b--transparent ph0 mh0" ]
+                [ div [ class "mt3" ]
+                    [ input
+                        [ type_ "text"
+                        , class "pa2 input-reset ba bg-transparent w-100 measure"
+                        , placeholder "Type a chord"
+                        , value (Maybe.withDefault "" model.chordString)
+                        , onInput Typed
+                        ]
+                        []
+                    ]
+                , div [ class "mt3" ]
+                    [ a
+                        [ onClick Render
+                        , class "f6 link dim ba bw2 ph3 pv2 mb2 dib purple"
+                        ]
+                        [ text "Render!" ]
+                    ]
+                ]
+            , div [ id "chord-display" ] []
             ]
-            []
-        , button [ onClick Render ] [ text "Render!" ]
-        , div [ id "chord-display" ] []
         ]
     }
