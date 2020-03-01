@@ -4,6 +4,8 @@ import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Json.Encode as Encode
+import Vexflow exposing (singleChord)
 
 
 main =
@@ -21,6 +23,7 @@ type alias Model =
 
 type Msg
     = Typed String
+    | Render
 
 
 init : () -> ( Model, Cmd Msg )
@@ -35,7 +38,20 @@ subscriptions _ =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    ( model, Cmd.none )
+    case msg of
+        Typed newChordString ->
+            ( { model | chordString = Just newChordString }, Cmd.none )
+
+        Render ->
+            ( model, encodeChord model |> singleChord )
+
+
+encodeChord : Model -> Encode.Value
+encodeChord { chordString } =
+    Encode.object
+        [ ( "elementId", Encode.string "chord-display" )
+        , ( "notes", String.split "," (Maybe.withDefault "" chordString) |> Encode.list Encode.string )
+        ]
 
 
 type alias Document msg =
@@ -48,6 +64,14 @@ view : Model -> Document Msg
 view model =
     { title = "Chordata"
     , body =
-        [ div [ id "chord-display" ] [ text "Hello world" ]
+        [ input
+            [ type_ "text"
+            , placeholder "Type a chord"
+            , value (Maybe.withDefault "" model.chordString)
+            , onInput Typed
+            ]
+            []
+        , button [ onClick Render ] [ text "Render!" ]
+        , div [ id "chord-display" ] []
         ]
     }
