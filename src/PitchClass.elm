@@ -4,6 +4,144 @@ defaults : List PitchClass
 defaults =
     [ C, Cs, D, Ds, E, F, Fs, G, Gs, A, As, B ]
 
+tonesFor : PitchClass -> List PitchClass
+tonesFor root =
+    let
+        (before, after) = [C, D, E, F, G, A, B] |> List.partition (\x -> toInt x < toInt root)
+        degrees         = after ++ before
+        solfeges        = List.map toSolfege <| degrees
+        absPitches      = iterate ((+) 1) (toInt root) |> List.take 12
+    in
+
+fromSolfege : Solfege -> List PitchClass
+fromSolfege s = 
+    case s of
+        Do -> [Cff, Cf, C, Cs, Css]
+        Re -> [Dff, Df, D, Ds, Dss]
+        Mi -> [Eff, Ef, E, Es, Ess]
+        Fa -> [Fff, Ff, F, Fs, Fss]
+        Sol -> [Gff, Gf, G, Gs, Gss]
+        La -> [Aff, Af, A, As, Ass]
+        Ti -> [Bff, Bf, B, Bs, Bss]
+
+toSolfege : PitchClass -> Solfege
+toSolfege pc =
+    case pc of
+        Cff ->
+            Do
+
+        Cf ->
+            Do
+
+        C ->
+            Do
+
+        Cs ->
+            Do
+
+        Css ->
+            Do
+
+        Dff ->
+            Re
+
+        Df ->
+            Re
+
+        D ->
+            Re
+
+        Ds ->
+            Re
+
+        Dss ->
+            Re
+
+        Eff ->
+            Mi
+
+        Ef ->
+            Mi
+
+        E ->
+            Mi
+
+        Es ->
+            Mi
+
+        Ess ->
+            Mi
+
+        Fff ->
+            Fa
+
+        Ff ->
+            Fa
+
+        F ->
+            Fa
+
+        Fs ->
+            Fa
+
+        Fss ->
+            Fa
+
+        Gff ->
+            Sol
+
+        Gf ->
+            Sol
+
+        G ->
+            Sol
+
+        Gs ->
+            Sol
+
+        Gss ->
+            Sol
+
+        Aff ->
+            La
+
+        Af ->
+            La
+
+        A ->
+            La
+
+        As ->
+            La
+
+        Ass ->
+            La
+
+        Bff ->
+            Ti
+
+        Bf ->
+            Ti
+
+        B ->
+            Ti
+
+        Bs ->
+            Ti
+
+        Bss ->
+            Ti
+    
+    
+type Solfege 
+    = Do
+    | Re
+    | Mi
+    | Fa
+    | Sol
+    | La
+    | Ti
+
 type PitchClass
     = Cff
     | Cf

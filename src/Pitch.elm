@@ -43,3 +43,16 @@ pitch ap =
     in
     Maybe.map (\v -> {pitchClass = v, octave = oct - 1}) pc 
 
+diatonicPitch : PitchClass -> AbsPitch -> Maybe Pitch
+diatonicPitch root ap =
+    let
+        oct =
+            ap // 12
+
+        n =
+            modBy 12 ap
+
+        pc =
+            Array.get n (Array.fromList <| PitchClass.tonesFor root)
+    in
+    Maybe.map (\v -> {pitchClass = v, octave = oct - 1}) pc 
