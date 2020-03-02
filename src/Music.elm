@@ -1,7 +1,8 @@
-module Music exposing (AbsPitch, Chord, ChordDefinition, Interval(..), IntervalLength, Octave, Pitch, PitchClass(..), absPitch, augmentedSeventhChord, augmentedTriad, chord, defaultPCs, diminishedSeventhChord, diminishedTriad, dominantSeventhChord, dominantSeventhFlat5Chord, dominantSeventhSus4Chord, intervalLength, majorSeventhChord, majorSixthChord, majorSus2, majorSus4, majorTriad, minorMajorChord, minorSeventhChord, minorSeventhFlat5Chord, minorSixthChord, minorTriad, pcToInt, pitch)
+module Music exposing (..)
 
 import Array
 import List.Extra exposing (scanl)
+import Regex as Regex
 
 
 
@@ -163,8 +164,8 @@ pitch ap =
 -}
 
 
-chord : Chord -> Octave -> Maybe (List Pitch)
-chord { root, intervals } octave =
+chordPitches : Octave -> Chord -> Maybe (List Pitch)
+chordPitches octave { root, intervals } =
     let
         startingAbsPitch =
             absPitch <| Pitch root octave
@@ -181,6 +182,16 @@ chord { root, intervals } octave =
 
         l ->
             Just l
+
+
+chordPitchClasses : Chord -> Maybe (List PitchClass)
+chordPitchClasses chord =
+    case chordPitches 4 chord of
+        Nothing ->
+            Nothing
+
+        Just pcs ->
+            Just <| List.map .pitchClass pcs
 
 
 addInterval : AbsPitch -> Interval -> AbsPitch
@@ -458,3 +469,361 @@ diminishedSeventhChord =
 
 minorSixthChord =
     minorTriad ++ [ MajorSixth ]
+
+
+
+-- TODO: should this be in a PitchClass module so we can do
+-- `PitchClass.fromString`? (and maybe `PitchClass.toInt`)
+
+
+chordNameRegex : Regex.Regex
+chordNameRegex =
+    Maybe.withDefault Regex.never <|
+        Regex.fromString "([ABCDEFG]{1}[#b]{0,2})(.*)"
+
+
+chordFromString : String -> Maybe Chord
+chordFromString s =
+    let
+        components matches =
+            case matches of
+                Nothing ->
+                    Nothing
+
+                Just (pc :: cd :: _) ->
+                    Just
+                        ( pcFromString (Maybe.withDefault "" pc)
+                        , chordDefinitionFromString (Maybe.withDefault "" cd)
+                        )
+
+                Just _ ->
+                    Nothing
+
+        buildChord cs =
+            case cs of
+                ( Nothing, _ ) ->
+                    Nothing
+
+                ( _, Nothing ) ->
+                    Nothing
+
+                ( Just pc, Just cd ) ->
+                    Just <| Chord pc cd
+    in
+    Regex.find chordNameRegex s
+        |> List.map .submatches
+        |> List.head
+        |> components
+        |> Maybe.andThen buildChord
+
+
+chordToString : Octave -> Chord -> String
+chordToString octave chord =
+    case chordPitches octave chord of
+        Nothing ->
+            ""
+
+        Just pcs ->
+            List.map pitchToString pcs |> String.join " "
+
+
+pitchToString : Pitch -> String
+pitchToString { pitchClass, octave } =
+    pcToString pitchClass ++ String.fromInt octave
+
+
+basicChordPitches =
+    chordPitches 4
+
+
+pcFromString : String -> Maybe PitchClass
+pcFromString s =
+    case s of
+        "Cbb" ->
+            Just Cff
+
+        "Cb" ->
+            Just Cf
+
+        "C" ->
+            Just C
+
+        "Dbb" ->
+            Just Dff
+
+        "C#" ->
+            Just Cs
+
+        "Db" ->
+            Just Df
+
+        "C##" ->
+            Just Css
+
+        "D" ->
+            Just D
+
+        "Ebb" ->
+            Just Eff
+
+        "D#" ->
+            Just Ds
+
+        "Eb" ->
+            Just Ef
+
+        "Fbb" ->
+            Just Fff
+
+        "D##" ->
+            Just Dss
+
+        "E" ->
+            Just E
+
+        "Fb" ->
+            Just Ff
+
+        "E#" ->
+            Just Es
+
+        "F" ->
+            Just F
+
+        "Gbb" ->
+            Just Gff
+
+        "E##" ->
+            Just Ess
+
+        "F#" ->
+            Just Fs
+
+        "Gb" ->
+            Just Gf
+
+        "F##" ->
+            Just Fss
+
+        "G" ->
+            Just G
+
+        "Abb" ->
+            Just Aff
+
+        "G#" ->
+            Just Gs
+
+        "Ab" ->
+            Just Af
+
+        "G##" ->
+            Just Gss
+
+        "A" ->
+            Just A
+
+        "Bbb" ->
+            Just Bff
+
+        "A#" ->
+            Just As
+
+        "Bb" ->
+            Just Bf
+
+        "A##" ->
+            Just Ass
+
+        "B" ->
+            Just B
+
+        "B#" ->
+            Just Bs
+
+        "B##" ->
+            Just Bss
+
+        _ ->
+            Nothing
+
+
+pcToString : PitchClass -> String
+pcToString pc =
+    case pc of
+        Cff ->
+            "Cbb"
+
+        Cf ->
+            "Cb"
+
+        C ->
+            "C"
+
+        Dff ->
+            "Dbb"
+
+        Cs ->
+            "C#"
+
+        Df ->
+            "Db"
+
+        Css ->
+            "C##"
+
+        D ->
+            "D"
+
+        Eff ->
+            "Ebb"
+
+        Ds ->
+            "D#"
+
+        Ef ->
+            "Eb"
+
+        Fff ->
+            "Fbb"
+
+        Dss ->
+            "D##"
+
+        E ->
+            "E"
+
+        Ff ->
+            "Fb"
+
+        Es ->
+            "E#"
+
+        F ->
+            "F"
+
+        Gff ->
+            "Gbb"
+
+        Ess ->
+            "E##"
+
+        Fs ->
+            "F#"
+
+        Gf ->
+            "Gb"
+
+        Fss ->
+            "F##"
+
+        G ->
+            "G"
+
+        Aff ->
+            "Abb"
+
+        Gs ->
+            "G#"
+
+        Af ->
+            "Ab"
+
+        Gss ->
+            "G##"
+
+        A ->
+            "A"
+
+        Bff ->
+            "Bbb"
+
+        As ->
+            "A#"
+
+        Bf ->
+            "Bb"
+
+        Ass ->
+            "A##"
+
+        B ->
+            "B"
+
+        Bs ->
+            "B#"
+
+        Bss ->
+            "B##"
+
+
+chordDefinitionFromString : String -> Maybe ChordDefinition
+chordDefinitionFromString s =
+    case s of
+        "" ->
+            Just majorTriad
+
+        "sus2" ->
+            Just majorSus2
+
+        "sus4" ->
+            Just majorSus4
+
+        "-" ->
+            Just minorTriad
+
+        "0" ->
+            Just diminishedTriad
+
+        "°" ->
+            Just diminishedTriad
+
+        "+" ->
+            Just augmentedTriad
+
+        "Maj7" ->
+            Just majorSeventhChord
+
+        "MA7" ->
+            Just majorSeventhChord
+
+        "6" ->
+            Just majorSixthChord
+
+        "7" ->
+            Just dominantSeventhChord
+
+        "7sus4" ->
+            Just dominantSeventhSus4Chord
+
+        "-7" ->
+            Just minorSeventhChord
+
+        "-7b5" ->
+            Just minorSeventhFlat5Chord
+
+        "ø7" ->
+            Just minorSeventhFlat5Chord
+
+        -- half-diminished seventh
+        "+7" ->
+            Just augmentedSeventhChord
+
+        "7b5" ->
+            Just dominantSeventhFlat5Chord
+
+        "-Maj7" ->
+            Just minorMajorChord
+
+        "07" ->
+            Just diminishedSeventhChord
+
+        -- fully diminished seventh
+        "°7" ->
+            Just diminishedSeventhChord
+
+        "-6" ->
+            Just minorSixthChord
+
+        _ ->
+            Nothing

@@ -5,6 +5,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Json.Encode as Encode
+import Music as M
 import Vexflow exposing (singleChord)
 
 
@@ -50,8 +51,17 @@ encodeChord : Model -> Encode.Value
 encodeChord { chordString } =
     Encode.object
         [ ( "elementId", Encode.string "chord-display" )
-        , ( "notes", String.split "," (Maybe.withDefault "" chordString) |> Encode.list Encode.string )
+        , ( "notes", parseChordPitches chordString |> Encode.list Encode.string )
         ]
+
+
+parseChordPitches : Maybe String -> List String
+parseChordPitches s =
+    Maybe.withDefault "" s
+        |> M.chordFromString
+        |> Maybe.andThen M.basicChordPitches
+        |> Maybe.withDefault []
+        |> List.map M.pitchToString
 
 
 type alias Document msg =
