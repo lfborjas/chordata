@@ -1,4 +1,7 @@
-module PitchClass exposing (defaults, fromString, toString, toInt, PitchClass)
+module PitchClass exposing (tonesFor, defaults, fromString, toString, toInt, PitchClass(..))
+
+import List.Extra exposing (iterate)
+import Tuple
 
 defaults : List PitchClass
 defaults =
@@ -6,12 +9,131 @@ defaults =
 
 tonesFor : PitchClass -> List PitchClass
 tonesFor root =
+    iterateTones 12 root
+
+iterateTones : Int -> PitchClass -> List PitchClass
+iterateTones n startingPC =
     let
-        (before, after) = [C, D, E, F, G, A, B] |> List.partition (\x -> toInt x < toInt root)
-        degrees         = after ++ before
-        solfeges        = List.map toSolfege <| degrees
-        absPitches      = iterate ((+) 1) (toInt root) |> List.take 12
+        stepSemitone (step, pc) =
+            if step == n then
+                Nothing
+            else
+                Just (step + 1, nextSemitone pc)
+
     in
+
+    iterate stepSemitone (1, startingPC) |> List.map Tuple.second
+
+{-| Determines the next "diatonically correct" semitone: that is, tries to be
+    monotonically increasing in base pitch class (sans acciddentals.)
+-}
+nextSemitone : PitchClass -> PitchClass
+nextSemitone pc =
+    case pc of
+        Cff ->
+            Cf -- B?
+
+        Cf ->
+            Dff
+
+        C ->
+            Df
+
+        Cs ->
+            D
+
+        Css ->
+            Ds
+
+        Dff ->
+            Df -- Bss?
+
+        Df ->
+            Eff
+
+        D ->
+            Ef
+
+        Ds ->
+            E
+
+        Dss ->
+            Es
+
+        Eff ->
+            Fff
+
+        Ef ->
+            Ff
+
+        E ->
+            F
+
+        Es ->
+            Ff
+
+        Ess ->
+            Fss
+
+        Fff ->
+            Ff -- Dss/E?
+
+        Ff ->
+            Gff
+
+        F ->
+            Gf
+
+        Fs ->
+            G
+
+        Fss ->
+            Af
+
+        Gff ->
+            Gf
+
+        Gf ->
+            Aff
+
+        G ->
+            Af
+
+        Gs ->
+            A
+
+        Gss ->
+            As
+
+        Aff ->
+            Af
+
+        Af ->
+            Bff
+
+        A ->
+            Bf
+
+        As ->
+            B
+
+        Ass ->
+            Bs
+
+        Bff ->
+            Bf
+
+        Bf ->
+            Cf
+
+        B ->
+            C
+
+        Bs ->
+            Cs
+
+        Bss ->
+            Css
 
 fromSolfege : Solfege -> List PitchClass
 fromSolfege s = 

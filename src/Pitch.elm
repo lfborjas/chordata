@@ -1,4 +1,4 @@
-module Pitch exposing (Pitch, Octave, AbsPitch, pitch, absPitch)
+module Pitch exposing (Pitch, Octave, AbsPitch, pitch, diatonicPitch, absPitch)
 
 import Array
 import PitchClass as PitchClass exposing (PitchClass)

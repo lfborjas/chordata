@@ -3,7 +3,7 @@ module Chord exposing (..)
 import Regex
 import PitchClass exposing (PitchClass)
 import Interval exposing (Interval(..), intervalLength)
-import Pitch exposing (Pitch, Octave, AbsPitch, pitch, absPitch)
+import Pitch exposing (Pitch, Octave, AbsPitch, diatonicPitch, absPitch)
 -- from my other project:
 -- https://github.com/lfborjas/piano-pal/blob/6d8d0067d9a14c6a7339a2517d73dd3bac15373e/src/Scales.hs
 
@@ -35,7 +35,7 @@ pitches octave { root, intervals } =
             List.map (addInterval startingAbsPitch) intervals
 
         resultingPitches =
-            List.filterMap pitch resultingAbsPitches
+            List.filterMap (diatonicPitch root) resultingAbsPitches
     in
     case resultingPitches of
         [] ->
