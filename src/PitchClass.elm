@@ -18,11 +18,120 @@ iterateTones n startingPC =
             if step == n then
                 Nothing
             else
-                Just (step + 1, nextSemitone pc)
+                Just (step + 1, sharpen pc)
 
     in
 
     iterate stepSemitone (1, startingPC) |> List.map Tuple.second
+
+{-| Sharpen, stay in the same base pitch class if possible.-}
+sharpen : PitchClass -> PitchClass
+sharpen pc =
+    case pc of
+        Cff ->
+            Cf -- B?
+
+        Cf ->
+            C
+
+        C ->
+            Cs
+
+        Cs ->
+            Css
+
+        Css ->
+            Ds
+
+        Dff ->
+            Df
+
+        Df ->
+            D
+
+        D ->
+            Ds
+
+        Ds ->
+            Dss
+
+        Dss ->
+            Es
+
+        Eff ->
+            Ef
+
+        Ef ->
+            E
+
+        E ->
+            Es
+
+        Es ->
+            Ess
+
+        Ess ->
+            Fss
+
+        Fff ->
+            Ff -- Dss/E?
+
+        Ff ->
+            F
+
+        F ->
+            Fs
+
+        Fs ->
+            Fss
+
+        Fss ->
+            Gs
+
+        Gff ->
+            Gf
+
+        Gf ->
+            G
+
+        G ->
+            Gs
+
+        Gs ->
+            Gss
+
+        Gss ->
+            As
+
+        Aff ->
+            Af
+
+        Af ->
+            A
+
+        A ->
+            As
+
+        As ->
+            Ass
+
+        Ass ->
+            Bs
+
+        Bff ->
+            Bf
+
+        Bf ->
+            B
+
+        B ->
+            Bs
+
+        Bs ->
+            Bss
+
+        Bss ->
+            Cs
 
 {-| Determines the next "diatonically correct" semitone: that is, tries to be
     monotonically increasing in base pitch class (sans acciddentals.)
