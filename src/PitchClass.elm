@@ -1,738 +1,207 @@
-module PitchClass exposing (tonesFor, defaults, fromString, toString, toInt, PitchClass(..))
+module PitchClass exposing (fromString, toString, toInt, PitchClass, ScaleTone(..), Accidental(..))
 
 import List.Extra exposing (iterate)
 import Tuple
 
-defaults : List PitchClass
-defaults =
-    [ C, Cs, D, Ds, E, F, Fs, G, Gs, A, As, B ]
-
-tonesFor : PitchClass -> List PitchClass
-tonesFor root =
-    iterateTones 12 root
-
-iterateTones : Int -> PitchClass -> List PitchClass
-iterateTones n startingPC =
-    let
-        stepSemitone (step, pc) =
-            if step == n then
-                Nothing
-            else
-                Just (step + 1, sharpen pc)
-
-    in
-
-    iterate stepSemitone (1, startingPC) |> List.map Tuple.second
-
-{-| Sharpen, stay in the same base pitch class if possible.-}
-sharpen : PitchClass -> PitchClass
-sharpen pc =
-    case pc of
-        Cff ->
-            Cf -- B?
-
-        Cf ->
-            C
-
-        C ->
-            Cs
-
-        Cs ->
-            Css
-
-        Css ->
-            Ds
-
-        Dff ->
-            Df
-
-        Df ->
-            D
-
-        D ->
-            Ds
-
-        Ds ->
-            Dss
-
-        Dss ->
-            Es
-
-        Eff ->
-            Ef
-
-        Ef ->
-            E
-
-        E ->
-            Es
-
-        Es ->
-            Ess
-
-        Ess ->
-            Fss
-
-        Fff ->
-            Ff -- Dss/E?
-
-        Ff ->
-            F
-
-        F ->
-            Fs
-
-        Fs ->
-            Fss
-
-        Fss ->
-            Gs
-
-        Gff ->
-            Gf
-
-        Gf ->
-            G
-
-        G ->
-            Gs
-
-        Gs ->
-            Gss
-
-        Gss ->
-            As
-
-        Aff ->
-            Af
-
-        Af ->
-            A
-
-        A ->
-            As
-
-        As ->
-            Ass
-
-        Ass ->
-            Bs
-
-        Bff ->
-            Bf
-
-        Bf ->
-            B
-
-        B ->
-            Bs
-
-        Bs ->
-            Bss
-
-        Bss ->
-            Cs
-
-{-| Determines the next "diatonically correct" semitone: that is, tries to be
-    monotonically increasing in base pitch class (sans acciddentals.)
--}
-nextSemitone : PitchClass -> PitchClass
-nextSemitone pc =
-    case pc of
-        Cff ->
-            Cf -- B?
-
-        Cf ->
-            Dff
-
-        C ->
-            Df
-
-        Cs ->
-            D
-
-        Css ->
-            Ds
-
-        Dff ->
-            Df -- Bss?
-
-        Df ->
-            Eff
-
-        D ->
-            Ef
-
-        Ds ->
-            E
-
-        Dss ->
-            Es
-
-        Eff ->
-            Fff
-
-        Ef ->
-            Ff
-
-        E ->
-            F
-
-        Es ->
-            Ff
-
-        Ess ->
-            Fss
-
-        Fff ->
-            Ff -- Dss/E?
-
-        Ff ->
-            Gff
-
-        F ->
-            Gf
-
-        Fs ->
-            G
-
-        Fss ->
-            Af
-
-        Gff ->
-            Gf
-
-        Gf ->
-            Aff
-
-        G ->
-            Af
-
-        Gs ->
-            A
-
-        Gss ->
-            As
-
-        Aff ->
-            Af
-
-        Af ->
-            Bff
-
-        A ->
-            Bf
-
-        As ->
-            B
-
-        Ass ->
-            Bs
-
-        Bff ->
-            Bf
-
-        Bf ->
-            Cf
-
-        B ->
-            C
-
-        Bs ->
-            Cs
-
-        Bss ->
-            Css
-
-fromSolfege : Solfege -> List PitchClass
-fromSolfege s = 
-    case s of
-        Do -> [Cff, Cf, C, Cs, Css]
-        Re -> [Dff, Df, D, Ds, Dss]
-        Mi -> [Eff, Ef, E, Es, Ess]
-        Fa -> [Fff, Ff, F, Fs, Fss]
-        Sol -> [Gff, Gf, G, Gs, Gss]
-        La -> [Aff, Af, A, As, Ass]
-        Ti -> [Bff, Bf, B, Bs, Bss]
-
-toSolfege : PitchClass -> Solfege
-toSolfege pc =
-    case pc of
-        Cff ->
-            Do
-
-        Cf ->
-            Do
-
-        C ->
-            Do
-
-        Cs ->
-            Do
-
-        Css ->
-            Do
-
-        Dff ->
-            Re
-
-        Df ->
-            Re
-
-        D ->
-            Re
-
-        Ds ->
-            Re
-
-        Dss ->
-            Re
-
-        Eff ->
-            Mi
-
-        Ef ->
-            Mi
-
-        E ->
-            Mi
-
-        Es ->
-            Mi
-
-        Ess ->
-            Mi
-
-        Fff ->
-            Fa
-
-        Ff ->
-            Fa
-
-        F ->
-            Fa
-
-        Fs ->
-            Fa
-
-        Fss ->
-            Fa
-
-        Gff ->
-            Sol
-
-        Gf ->
-            Sol
-
-        G ->
-            Sol
-
-        Gs ->
-            Sol
-
-        Gss ->
-            Sol
-
-        Aff ->
-            La
-
-        Af ->
-            La
-
-        A ->
-            La
-
-        As ->
-            La
-
-        Ass ->
-            La
-
-        Bff ->
-            Ti
-
-        Bf ->
-            Ti
-
-        B ->
-            Ti
-
-        Bs ->
-            Ti
-
-        Bss ->
-            Ti
-    
-    
-type Solfege 
-    = Do
-    | Re
-    | Mi
-    | Fa
-    | Sol
-    | La
-    | Ti
-
-type PitchClass
-    = Cff
-    | Cf
-    | C
-    | Dff
-    | Cs
-    | Df
-    | Css
-    | D
-    | Eff
-    | Ds
-    | Ef
-    | Fff
-    | Dss
-    | E
-    | Ff
-    | Es
-    | F
-    | Gff
-    | Ess
-    | Fs
-    | Gf
-    | Fss
-    | G
-    | Aff
-    | Gs
-    | Af
-    | Gss
-    | A
-    | Bff
-    | As
-    | Bf
-    | Ass
+type ScaleTone 
+    = A
     | B
-    | Bs
-    | Bss
+    | C
+    | D
+    | E
+    | F
+    | G
+
+type Accidental 
+    = DoubleFlat
+    | Flat
+    | Natural
+    | Sharp
+    | DoubleSharp
+
+type alias PitchClass =
+    {
+        scaleTone : ScaleTone
+    ,   accidental : Accidental   
+    }
+
+{- semitones from C -}
+toneToInt : ScaleTone -> Int
+toneToInt t =
+    case t of
+        C -> 0
+        D -> 2
+        E -> 4
+        F -> 5
+        G -> 7
+        A -> 9
+        B -> 11
+
+toneToString : ScaleTone -> String
+toneToString t =
+    case t of
+        C -> "C"
+        D -> "D"
+        E -> "E"
+        F -> "F"
+        G -> "G"
+        A -> "A"
+        B -> "B"
+            
+    
+
+accidentalToInt : Accidental -> Int
+accidentalToInt a =
+    case a of
+        DoubleFlat -> -2
+        Flat -> -1
+        Natural -> 0
+        Sharp -> 1
+        DoubleSharp -> 2
+
+accidentalToString : Accidental -> String
+accidentalToString a =
+    case a of
+        DoubleFlat -> "bb"
+        Flat -> "b"
+        Natural -> ""
+        Sharp -> "#"
+        DoubleSharp -> "##"
+    
 
 toInt : PitchClass -> Int
-toInt pc =
-    case pc of
-        Cff ->
-            -2
-
-        Cf ->
-            -1
-
-        C ->
-            0
-
-        Cs ->
-            1
-
-        Css ->
-            2
-
-        Dff ->
-            0
-
-        Df ->
-            1
-
-        D ->
-            2
-
-        Ds ->
-            3
-
-        Dss ->
-            4
-
-        Eff ->
-            2
-
-        Ef ->
-            3
-
-        E ->
-            4
-
-        Es ->
-            5
-
-        Ess ->
-            6
-
-        Fff ->
-            3
-
-        Ff ->
-            4
-
-        F ->
-            5
-
-        Fs ->
-            6
-
-        Fss ->
-            7
-
-        Gff ->
-            5
-
-        Gf ->
-            6
-
-        G ->
-            7
-
-        Gs ->
-            8
-
-        Gss ->
-            9
-
-        Aff ->
-            7
-
-        Af ->
-            8
-
-        A ->
-            9
-
-        As ->
-            10
-
-        Ass ->
-            11
-
-        Bff ->
-            9
-
-        Bf ->
-            10
-
-        B ->
-            11
-
-        Bs ->
-            12
-
-        Bss ->
-            13
+toInt {scaleTone, accidental} = 
+    let
+        s = toneToInt scaleTone
+        a = accidentalToInt accidental
+    in
+    s + a
 
 toString : PitchClass -> String
-toString pc =
-    case pc of
-        Cff ->
-            "Cbb"
+toString {scaleTone, accidental} =
+    let
+        s = toneToString scaleTone
+        a = accidentalToString accidental
+    in
+    s ++ a
 
-        Cf ->
-            "Cb"
-
-        C ->
-            "C"
-
-        Dff ->
-            "Dbb"
-
-        Cs ->
-            "C#"
-
-        Df ->
-            "Db"
-
-        Css ->
-            "C##"
-
-        D ->
-            "D"
-
-        Eff ->
-            "Ebb"
-
-        Ds ->
-            "D#"
-
-        Ef ->
-            "Eb"
-
-        Fff ->
-            "Fbb"
-
-        Dss ->
-            "D##"
-
-        E ->
-            "E"
-
-        Ff ->
-            "Fb"
-
-        Es ->
-            "E#"
-
-        F ->
-            "F"
-
-        Gff ->
-            "Gbb"
-
-        Ess ->
-            "E##"
-
-        Fs ->
-            "F#"
-
-        Gf ->
-            "Gb"
-
-        Fss ->
-            "F##"
-
-        G ->
-            "G"
-
-        Aff ->
-            "Abb"
-
-        Gs ->
-            "G#"
-
-        Af ->
-            "Ab"
-
-        Gss ->
-            "G##"
-
-        A ->
-            "A"
-
-        Bff ->
-            "Bbb"
-
-        As ->
-            "A#"
-
-        Bf ->
-            "Bb"
-
-        Ass ->
-            "A##"
-
-        B ->
-            "B"
-
-        Bs ->
-            "B#"
-
-        Bss ->
-            "B##"
-
+sharpen : PitchClass -> Result String PitchClass
+sharpen pc =
+    case pc.accidental of
+        DoubleFlat -> Ok {pc | accidental = Flat}
+        Flat -> Ok {pc | accidental = Natural}    
+        Natural -> Ok {pc | accidental = Sharp}
+        Sharp -> Ok {pc | accidental = DoubleSharp}
+        _     -> Err "Can't sharpen tone without moving pitch class!"
+            
+-- TODO! this can be formed by doing a Maybe.andThen from fromStrings functions for both st and accidental!!
 fromString : String -> Maybe PitchClass
 fromString s =
     case s of
         "Cbb" ->
-            Just Cff
+            Just <| PitchClass C DoubleFlat
 
         "Cb" ->
-            Just Cf
+            Just <| PitchClass C Flat
 
         "C" ->
-            Just C
+            Just <| PitchClass C Natural
 
         "Dbb" ->
-            Just Dff
+            Just <| PitchClass D DoubleFlat
 
         "C#" ->
-            Just Cs
+            Just <| PitchClass C Sharp
 
         "Db" ->
-            Just Df
+            Just <| PitchClass D Flat
 
         "C##" ->
-            Just Css
+            Just <| PitchClass C DoubleSharp
 
         "D" ->
-            Just D
+            Just <| PitchClass D Natural
 
         "Ebb" ->
-            Just Eff
+            Just <| PitchClass E DoubleFlat
 
         "D#" ->
-            Just Ds
+            Just <| PitchClass D Sharp
 
         "Eb" ->
-            Just Ef
+            Just <| PitchClass E Flat
 
         "Fbb" ->
-            Just Fff
+            Just <| PitchClass F DoubleFlat
 
         "D##" ->
-            Just Dss
+            Just <| PitchClass D DoubleSharp
 
         "E" ->
-            Just E
+            Just <| PitchClass E Natural
 
         "Fb" ->
-            Just Ff
+            Just <| PitchClass F Flat
 
         "E#" ->
-            Just Es
+            Just <| PitchClass E Sharp
 
         "F" ->
-            Just F
+            Just <| PitchClass F Natural
 
         "Gbb" ->
-            Just Gff
+            Just <| PitchClass G DoubleFlat
 
         "E##" ->
-            Just Ess
+            Just <| PitchClass E DoubleSharp
 
         "F#" ->
-            Just Fs
+            Just <| PitchClass F Sharp
 
         "Gb" ->
-            Just Gf
+            Just <| PitchClass G Flat
 
         "F##" ->
-            Just Fss
+            Just <| PitchClass F DoubleSharp
 
         "G" ->
-            Just G
+            Just <| PitchClass G Natural
 
         "Abb" ->
-            Just Aff
+            Just <| PitchClass A DoubleFlat
 
         "G#" ->
-            Just Gs
+            Just <| PitchClass G Sharp
 
         "Ab" ->
-            Just Af
+            Just <| PitchClass A Flat
 
         "G##" ->
-            Just Gss
+            Just <| PitchClass G DoubleSharp
 
         "A" ->
-            Just A
+            Just <| PitchClass A Natural
 
         "Bbb" ->
-            Just Bff
+            Just <| PitchClass B DoubleFlat
 
         "A#" ->
-            Just As
+            Just <| PitchClass A Sharp
 
         "Bb" ->
-            Just Bf
+            Just <| PitchClass B Flat
 
         "A##" ->
-            Just Ass
+            Just <| PitchClass A DoubleSharp
 
         "B" ->
-            Just B
+            Just <| PitchClass B Natural
 
         "B#" ->
-            Just Bs
+            Just <| PitchClass B Sharp
 
         "B##" ->
-            Just Bss
+            Just <| PitchClass B DoubleSharp
 
         _ ->
             Nothing
