@@ -1,4 +1,4 @@
-module PitchClass exposing (fromString, toString, toInt, PitchClass, ScaleTone(..), Accidental(..))
+module PitchClass exposing (fromString, toString, toneToInt, accidentalToInt, toInt, PitchClass, ScaleTone(..), Accidental(..))
 
 import List.Extra exposing (iterate)
 import Tuple
