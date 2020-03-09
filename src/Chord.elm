@@ -28,23 +28,16 @@ type alias Chord =
 
 -}
 pitches : Octave -> Chord -> Maybe (List Pitch)
-pitches octave { root, intervals } =
+pitches octave chord =
     let
-        startingAbsPitch =
-            absPitch <| Pitch root octave
-
-        resultingAbsPitches =
-            List.map (addInterval startingAbsPitch) intervals
-
-        resultingPitches =
-            List.filterMap pitch resultingAbsPitches
+        pcs = pitchClasses chord
     in
-    case resultingPitches of
+    case pcs of
         [] ->
             Nothing
 
         l ->
-            Just l
+            Just <| List.map (\x -> Pitch x octave) l
 
 pitchClasses : Chord -> List PitchClass
 pitchClasses {root, intervals} = 
