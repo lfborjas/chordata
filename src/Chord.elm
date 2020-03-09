@@ -1,9 +1,11 @@
 module Chord exposing (..)
 
 import Regex
+import Result
 import PitchClass exposing (PitchClass)
 import Interval exposing (Interval(..), intervalLength)
 import Pitch exposing (Pitch, Octave, AbsPitch, absPitch, pitch)
+import Scale exposing (..)
 -- from my other project:
 -- https://github.com/lfborjas/piano-pal/blob/6d8d0067d9a14c6a7339a2517d73dd3bac15373e/src/Scales.hs
 
@@ -43,6 +45,10 @@ pitches octave { root, intervals } =
 
         l ->
             Just l
+
+pitchClasses : Chord -> List PitchClass
+pitchClasses {root, intervals} = 
+    List.filterMap (applyInterval root >> Result.toMaybe) intervals
 
 basic : Chord -> Maybe (List Pitch)
 basic = pitches 4
