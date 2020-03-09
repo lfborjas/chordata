@@ -93,7 +93,34 @@ sharpen pc =
         Natural -> Ok {pc | accidental = Sharp}
         Sharp -> Ok {pc | accidental = DoubleSharp}
         _     -> Err "Can't sharpen tone without moving pitch class!"
-            
+
+toneFromString : String -> Result String ScaleTone
+toneFromString s =
+    case s of
+       "C" -> Ok C
+       "D" -> Ok D
+       "E" -> Ok E
+       "F" -> Ok F
+       "G" -> Ok G
+       "A" -> Ok A
+       "B" -> Ok B
+       _   -> Err "Unknown scale tone"
+
+accidentalFromString : String -> Result String Accidental
+accidentalFromString s =
+    case s of
+        "bb" -> Ok DoubleFlat
+        "b"  -> Ok Flat
+        ""   -> Ok Natural
+        "#"  -> Ok Sharp
+        "##" -> Ok DoubleSharp
+        _    -> Err "Unknown accidental"
+
+-- meh: have to muck with either parsers or more regex chicanery
+-- fromStringR : String -> Result String PitchClass
+-- fromStringR s =
+
+
 -- TODO! this can be formed by doing a Maybe.andThen from fromStrings functions for both st and accidental!!
 fromString : String -> Maybe PitchClass
 fromString s =
