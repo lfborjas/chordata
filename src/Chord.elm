@@ -1,9 +1,11 @@
 module Chord exposing (..)
 
 import Regex
+import Result
 import PitchClass exposing (PitchClass)
 import Interval exposing (Interval(..), intervalLength)
-import Pitch exposing (Pitch, Octave, AbsPitch, pitch, absPitch)
+import Pitch exposing (Pitch, Octave, AbsPitch, absPitch, pitch)
+import Scale exposing (..)
 -- from my other project:
 -- https://github.com/lfborjas/piano-pal/blob/6d8d0067d9a14c6a7339a2517d73dd3bac15373e/src/Scales.hs
 
@@ -26,23 +28,20 @@ type alias Chord =
 
 -}
 pitches : Octave -> Chord -> Maybe (List Pitch)
-pitches octave { root, intervals } =
+pitches octave chord =
     let
-        startingAbsPitch =
-            absPitch <| Pitch root octave
-
-        resultingAbsPitches =
-            List.map (addInterval startingAbsPitch) intervals
-
-        resultingPitches =
-            List.filterMap pitch resultingAbsPitches
+        pcs = pitchClasses chord
     in
-    case resultingPitches of
+    case pcs of
         [] ->
             Nothing
 
         l ->
-            Just l
+            Just <| List.map (\x -> Pitch x octave) l
+
+pitchClasses : Chord -> List PitchClass
+pitchClasses {root, intervals} = 
+    List.filterMap (applyInterval root >> Result.toMaybe) intervals
 
 basic : Chord -> Maybe (List Pitch)
 basic = pitches 4
